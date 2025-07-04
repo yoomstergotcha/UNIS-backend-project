@@ -1,0 +1,45 @@
+name: Deploy Spring Boot to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build with Gradle
+      run: ./gradlew clean build
+
+    - name: Copy jar and Dockerfile to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        source: "build/libs/*.jar,Dockerfile"
+        target: "~/board"
+
+    - name: Deploy on EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd ~/board
+          docker stop unis-app || true
+          docker rm unis-app || true
+          docker rmi unis-image || true
+          docker build -t unis-image .
+          docker run -d --name unis-app -p 8080:8080 unis-image
