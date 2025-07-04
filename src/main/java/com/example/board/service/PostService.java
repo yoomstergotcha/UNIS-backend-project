@@ -4,6 +4,7 @@ import com.example.board.domain.Post;
 import com.example.board.repository.PostRepository;
 import lombok.*;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,7 +47,12 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
+    @Cacheable(value = "popularPosts")
     public List<Post> getPopularPosts() {
+        System.out.println("🔥 인기글 DB에서 조회 중 (캐싱 안 됐을 때만 보임)");
         return postRepository.findTop5ByOrderByViewsDesc();
     }
+
 }
+
+

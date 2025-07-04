@@ -40,4 +40,4 @@ out/
 # 환경 설정 (DB, Redis, API key 등)
 application.yml
 application.properties
-.env
+.env/src/main/resources/application.yml

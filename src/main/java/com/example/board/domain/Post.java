@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
@@ -13,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 
-public class Post {
+public class Post implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,10 +34,15 @@ public class Post {
     @Column(nullable = false)
     private Long views;
 
+    @Serial
+    private static final long serialVersionUID = 1L; // 직렬화 버전 명시
+
     @PrePersist
     protected void onCreate(){
         this.createdAt = LocalDateTime.now();
         this.views = 0L;
+
+
     }
 
 
